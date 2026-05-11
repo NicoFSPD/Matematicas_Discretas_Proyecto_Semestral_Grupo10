@@ -19,6 +19,9 @@ typedef struct {
 
 int obtener_Calles(FILE *archivo, Calle calles[], int *cantidad_calles);
 int obtener_Destinos(FILE *archivo, Destino destinos[], int *cantidad_destinos);
+int ejecutar_mapa(void);
+int ejecutar_obtener_nodos(void);
+int ejecutar_obtener_ruta(void);
 
 static int coordenadas_validas(const Calle *calle) {
     if (calle->coordenada_x_inicio < 0 || calle->coordenada_x_inicio > 2000) {
@@ -31,20 +34,6 @@ static int coordenadas_validas(const Calle *calle) {
         return 0;
     }
     if (calle->coordenada_y_final < 0 || calle->coordenada_y_final > 2000) {
-        return 0;
-    }
-
-    return 1;
-}
-
-static int ejecutar_comando(const char *descripcion, const char *comando) {
-    int codigo;
-
-    printf("\n%s\n", descripcion);
-    codigo = system(comando);
-
-    if (codigo != 0) {
-        printf("Error ejecutando: %s\n", comando);
         return 0;
     }
 
@@ -148,22 +137,16 @@ static int procesar_archivo_txt(void) {
     fclose(salida_destinos);
     fclose(c);
 
-    if (!ejecutar_comando("Compilando mapa.c...", "gcc .\\mapa.c -o .\\mapa.exe")) {
+    if (ejecutar_mapa() != 0) {
+        printf("Error ejecutando el modulo mapa.\n");
         return 0;
     }
-    if (!ejecutar_comando("Ejecutando mapa.exe...", ".\\mapa.exe")) {
+    if (ejecutar_obtener_nodos() != 0) {
+        printf("Error ejecutando el modulo obtener_nodos.\n");
         return 0;
     }
-    if (!ejecutar_comando("Compilando obtener_nodos.c...", "gcc .\\obtener_nodos.c -o .\\obtener_nodos.exe")) {
-        return 0;
-    }
-    if (!ejecutar_comando("Ejecutando obtener_nodos.exe...", ".\\obtener_nodos.exe")) {
-        return 0;
-    }
-    if (!ejecutar_comando("Compilando obtener_ruta.c...", "gcc .\\obtener_ruta.c -o .\\obtener_ruta.exe")) {
-        return 0;
-    }
-    if (!ejecutar_comando("Ejecutando obtener_ruta.exe...", ".\\obtener_ruta.exe")) {
+    if (ejecutar_obtener_ruta() != 0) {
+        printf("Error ejecutando el modulo obtener_ruta.\n");
         return 0;
     }
 

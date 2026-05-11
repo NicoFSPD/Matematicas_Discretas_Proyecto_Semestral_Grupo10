@@ -533,7 +533,7 @@ static void imprimir_ruta(Destino destinos[],
 // 3) Construir adyacencia de nodos segun las calles.
 // 4) Ejecutar Dijkstra por tramos para visitar todos los destinos en orden.
 // 5) Exportar nodos numerados y matriz para verlo.
-int main(void) {
+int ejecutar_obtener_ruta(void) {
 	Calle calles[MAX_CALLES];
 	Nodo nodos[MAX_NODOS];
 	Destino destinos[MAX_DESTINOS];

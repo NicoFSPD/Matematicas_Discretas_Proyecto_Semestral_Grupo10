@@ -161,7 +161,7 @@ static int leer_destinos(const char *archivo, Destino destinos[], int *cantidad_
 	return 1;
 }
 
-int main(void) {
+int ejecutar_mapa(void) {
 	Calle calles[50];
 	Destino destinos[200];
 	int cantidad_calles = 0;

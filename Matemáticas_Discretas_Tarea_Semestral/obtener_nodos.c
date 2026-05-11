@@ -397,7 +397,7 @@ static int leer_calles(const char *archivo, Calle calles[], int *cantidad_calles
 }
 
 // Programa principal que calcula intersecciones y las guarda en nodos.txt.
-int main(void) {
+int ejecutar_obtener_nodos(void) {
     Calle calles[50];
     Nodo nodos[1000];
     NodoDestino destinos[200];
