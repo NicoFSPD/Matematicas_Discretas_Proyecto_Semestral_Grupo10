@@ -1,0 +1,7 @@
+1
+Horizontal1 0 100 500 100 X
+4
+Iglesia Horizontal1 100
+Museo Horizontal1 300
+Parque Horizontal1 200
+Rio Horizontal1 500

@@ -1,0 +1,6 @@
+2
+Horizontal1 0 100 500 100 X
+Horizontal2 0 200 500 200 X
+2
+A Horizontal2 100
+B Horizontal1 300

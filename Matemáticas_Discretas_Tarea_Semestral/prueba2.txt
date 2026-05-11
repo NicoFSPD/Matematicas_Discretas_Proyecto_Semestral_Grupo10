@@ -1,0 +1,9 @@
+5
+Horizontal1 0 0 100 0 X
+Horizontal2 2001 100 300 100 X
+Vertical1 0 0 0 100 Y
+Vertical2 100 100 100 300 Y
+Diagonal1 0 0 300 300 X
+2
+Iglesia Horizontal1 50
+Rio Vertical2 250
