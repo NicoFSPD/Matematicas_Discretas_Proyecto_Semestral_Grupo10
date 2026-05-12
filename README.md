@@ -37,6 +37,7 @@ El programa está compuesto por los siguientes archivos:
 Compilar utilizando:
 
 ```bash
+cd Matemáticas_Discretas_Tarea_Semestral 
 gcc ./Tarea_Semestral.c ./extraer_calles_y_destinos.c ./mapa.c ./obtener_nodos.c ./obtener_ruta.c -o ./Tarea_Semestral -lm
 ```
 
