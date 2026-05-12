@@ -5,16 +5,16 @@
 
 typedef struct {
     char nombre_calle[100];
-    int x1;
-    int y1;
-    int x2;
-    int y2;
+    double x1;
+    double y1;
+    double x2;
+    double y2;
     char eje;
 } Calle;
 
 typedef struct {
-    int x;
-    int y;
+    double x;
+    double y;
     char calle_a[100];
     char calle_b[100];
     int visitado;
@@ -22,8 +22,8 @@ typedef struct {
 
 typedef struct {
     char nombre[100];
-    int x;
-    int y;
+    double x;
+    double y;
     int visitado;
 } NodoDestino;
 
@@ -42,15 +42,14 @@ static int casi_igual(double a, double b) {
 }
 
 // Calcula el menor entre dos enteros.
-static int minimo_int(int a, int b) {
+static double minimo_double(double a, double b) {
     if (a < b) {
         return a;
     }
     return b;
 }
 
-// Calcula el mayor entre dos enteros.
-static int maximo_int(int a, int b) {
+static double maximo_double(double a, double b) {
     if (a > b) {
         return a;
     }
@@ -62,39 +61,22 @@ static double producto_cruz(double ax, double ay, double bx, double by) {
     return ax * by - ay * bx;
 }
 
-// Verifica si un punto pertenece al tramo delimitado por una calle.
-static int punto_en_segmento(double px, double py, Calle c) {
-    double min_x;
-    double max_x;
-    double min_y;
-    double max_y;
+static int punto_en_segmento(double px, double py, double ax, double ay, double bx, double by) {
     const double eps = 1e-9;
+    double abx = bx - ax;
+    double aby = by - ay;
+    double apx = px - ax;
+    double apy = py - ay;
+    double cruz = producto_cruz(abx, aby, apx, apy);
 
-    if (c.x1 < c.x2) {
-        min_x = (double)c.x1;
-    } else {
-        min_x = (double)c.x2;
+    if (!casi_igual(cruz, 0.0)) {
+        return 0;
     }
 
-    if (c.x1 > c.x2) {
-        max_x = (double)c.x1;
-    } else {
-        max_x = (double)c.x2;
+    if (px < minimo_double(ax, bx) - eps || px > maximo_double(ax, bx) + eps) {
+        return 0;
     }
-
-    if (c.y1 < c.y2) {
-        min_y = (double)c.y1;
-    } else {
-        min_y = (double)c.y2;
-    }
-
-    if (c.y1 > c.y2) {
-        max_y = (double)c.y1;
-    } else {
-        max_y = (double)c.y2;
-    }
-
-    if (px < min_x - eps || px > max_x + eps || py < min_y - eps || py > max_y + eps) {
+    if (py < minimo_double(ay, by) - eps || py > maximo_double(ay, by) + eps) {
         return 0;
     }
 
@@ -102,9 +84,9 @@ static int punto_en_segmento(double px, double py, Calle c) {
 }
 
 // Agrega un nodo nuevo SOLO si esa coordenada no existe todavía.
-static int agregar_nodo_si_no_existe(Nodo nodos[], int *cantidad_nodos, int x, int y, const char *a, const char *b) {
+static int agregar_nodo_si_no_existe(Nodo nodos[], int *cantidad_nodos, double x, double y, const char *a, const char *b) {
     for (int i = 0; i < *cantidad_nodos; i++) {
-        if (nodos[i].x == x && nodos[i].y == y) {
+        if (casi_igual(nodos[i].x, x) && casi_igual(nodos[i].y, y)) {
             return 1;
         }
     }
@@ -148,9 +130,7 @@ static int interseccion_segmentos(Calle a, Calle b, Nodo nodos[], int *cantidad_
         if (t >= -1e-9 && t <= 1.0 + 1e-9 && u >= -1e-9 && u <= 1.0 + 1e-9) {
             double ix = p_x + t * r_x;
             double iy = p_y + t * r_y;
-            int ix_entero = (int)llround(ix);
-            int iy_entero = (int)llround(iy);
-            return agregar_nodo_si_no_existe(nodos, cantidad_nodos, ix_entero, iy_entero, a.nombre_calle, b.nombre_calle);
+            return agregar_nodo_si_no_existe(nodos, cantidad_nodos, ix, iy, a.nombre_calle, b.nombre_calle);
         }
         return 1;
     }
@@ -159,22 +139,22 @@ static int interseccion_segmentos(Calle a, Calle b, Nodo nodos[], int *cantidad_
         return 1;
     }
 
-    if (punto_en_segmento((double)a.x1, (double)a.y1, b)) {
+    if (punto_en_segmento(a.x1, a.y1, b.x1, b.y1, b.x2, b.y2)) {
         if (!agregar_nodo_si_no_existe(nodos, cantidad_nodos, a.x1, a.y1, a.nombre_calle, b.nombre_calle)) {
             return 0;
         }
     }
-    if (punto_en_segmento((double)a.x2, (double)a.y2, b)) {
+    if (punto_en_segmento(a.x2, a.y2, b.x1, b.y1, b.x2, b.y2)) {
         if (!agregar_nodo_si_no_existe(nodos, cantidad_nodos, a.x2, a.y2, a.nombre_calle, b.nombre_calle)) {
             return 0;
         }
     }
-    if (punto_en_segmento((double)b.x1, (double)b.y1, a)) {
+    if (punto_en_segmento(b.x1, b.y1, a.x1, a.y1, a.x2, a.y2)) {
         if (!agregar_nodo_si_no_existe(nodos, cantidad_nodos, b.x1, b.y1, a.nombre_calle, b.nombre_calle)) {
             return 0;
         }
     }
-    if (punto_en_segmento((double)b.x2, (double)b.y2, a)) {
+    if (punto_en_segmento(b.x2, b.y2, a.x1, a.y1, a.x2, a.y2)) {
         if (!agregar_nodo_si_no_existe(nodos, cantidad_nodos, b.x2, b.y2, a.nombre_calle, b.nombre_calle)) {
             return 0;
         }
@@ -196,12 +176,12 @@ static int leer_destinos_coordenadas(const char *archivo, NodoDestino destinos[]
 
     while (fgets(linea, sizeof(linea), entrada) != NULL && contador < 200) {
         if (sscanf(linea,
-                   "%99s %d %d",
+                 "%99s %lf %lf",
                    destinos[contador].nombre,
                    &destinos[contador].x,
                    &destinos[contador].y) == 3 ||
             sscanf(linea,
-                   "%99s (%d, %d)",
+                 "%99s (%lf, %lf)",
                    destinos[contador].nombre,
                    &destinos[contador].x,
                    &destinos[contador].y) == 3) {
@@ -215,47 +195,24 @@ static int leer_destinos_coordenadas(const char *archivo, NodoDestino destinos[]
     return 1;
 }
 
-// Verifica si un punto entero esta sobre el segmento AB.
-static int punto_en_segmento_entero(int px, int py, int ax, int ay, int bx, int by) {
-    long long abx = (long long)bx - (long long)ax;
-    long long aby = (long long)by - (long long)ay;
-    long long apx = (long long)px - (long long)ax;
-    long long apy = (long long)py - (long long)ay;
-    long long cruz = abx * apy - aby * apx;
-
-    if (cruz != 0) {
-        return 0;
-    }
-
-    if (px < minimo_int(ax, bx) || px > maximo_int(ax, bx)) {
-        return 0;
-    }
-
-    if (py < minimo_int(ay, by) || py > maximo_int(ay, by)) {
-        return 0;
-    }
-
-    return 1;
-}
-
 // Marca nodos y destinos visitados al avanzar entre dos destinos en orden.
-static void marcar_recorrido(int origen_x,
-                             int origen_y,
-                             int destino_x,
-                             int destino_y,
+static void marcar_recorrido(double origen_x,
+                             double origen_y,
+                             double destino_x,
+                             double destino_y,
                              Nodo nodos[],
                              int cantidad_nodos,
                              NodoDestino destinos[],
                              int cantidad_destinos,
                              int indice_minimo) {
     for (int i = 0; i < cantidad_nodos; i++) {
-        if (punto_en_segmento_entero(nodos[i].x, nodos[i].y, origen_x, origen_y, destino_x, destino_y)) {
+        if (punto_en_segmento(nodos[i].x, nodos[i].y, origen_x, origen_y, destino_x, destino_y)) {
             nodos[i].visitado = 1;
         }
     }
 
     for (int i = indice_minimo; i < cantidad_destinos; i++) {
-        if (punto_en_segmento_entero(destinos[i].x, destinos[i].y, origen_x, origen_y, destino_x, destino_y)) {
+        if (punto_en_segmento(destinos[i].x, destinos[i].y, origen_x, origen_y, destino_x, destino_y)) {
             destinos[i].visitado = 1;
         }
     }
@@ -263,8 +220,8 @@ static void marcar_recorrido(int origen_x,
 
 // Recorre destinos en orden creciente, saltando los ya visitados previamente.
 static void recorrer_destinos_en_orden(Nodo nodos[], int cantidad_nodos, NodoDestino destinos[], int cantidad_destinos) {
-    int actual_x;
-    int actual_y;
+    double actual_x;
+    double actual_y;
     int siguiente;
 
     if (cantidad_destinos <= 0) {
@@ -329,7 +286,7 @@ static int guardar_estado_nodos(const char *archivo, Nodo nodos[], int cantidad_
 
     for (int i = 0; i < cantidad_nodos; i++) {
         fprintf(salida,
-                "%s %s %d %d %d\n",
+            "%s %s %.2f %.2f %d\n",
                 nodos[i].calle_a,
                 nodos[i].calle_b,
                 nodos[i].x,
@@ -352,7 +309,7 @@ static int guardar_estado_destinos(const char *archivo, NodoDestino destinos[], 
 
     for (int i = 0; i < cantidad_destinos; i++) {
         fprintf(salida,
-                "%d %s %d %d %d\n",
+            "%d %s %.2f %.2f %d\n",
                 i + 1,
                 destinos[i].nombre,
                 destinos[i].x,
@@ -377,7 +334,7 @@ static int leer_calles(const char *archivo, Calle calles[], int *cantidad_calles
 
     while (fgets(linea, sizeof(linea), entrada) != NULL && contador < 50) {
         if (sscanf(linea,
-                   "%99s %d %d %d %d %c",
+                   "%99s %lf %lf %lf %lf %c",
                    calles[contador].nombre_calle,
                    &calles[contador].x1,
                    &calles[contador].y1,
@@ -438,7 +395,7 @@ int ejecutar_obtener_nodos(void) {
 
     for (int i = 0; i < cantidad_nodos; i++) {
         fprintf(salida,
-                "%s %s %d %d\n",
+            "%s %s %.2f %.2f\n",
                 nodos[i].calle_a,
                 nodos[i].calle_b,
                 nodos[i].x,

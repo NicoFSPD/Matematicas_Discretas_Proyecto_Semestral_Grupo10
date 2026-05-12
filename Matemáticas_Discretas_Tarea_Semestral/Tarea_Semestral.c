@@ -4,17 +4,17 @@
 
 typedef struct {
     char nombre_calle[100];
-    int coordenada_x_inicio;
-    int coordenada_y_inicio;
-    int coordenada_x_final;
-    int coordenada_y_final;
+    double coordenada_x_inicio;
+    double coordenada_y_inicio;
+    double coordenada_x_final;
+    double coordenada_y_final;
     char eje_calle;
 } Calle;
 
 typedef struct {
     char nombre_destino[100];
     char calle[100];
-    int posicion;
+    double posicion;
 } Destino;
 
 int obtener_Calles(FILE *archivo, Calle calles[], int *cantidad_calles);
@@ -86,7 +86,7 @@ static int procesar_archivo_txt(void) {
             return 0;
         }
 
-        printf("%s %d %d %d %d %c\n",
+        printf("%s %.2f %.2f %.2f %.2f %c\n",
                calles[i].nombre_calle,
                calles[i].coordenada_x_inicio,
                calles[i].coordenada_y_inicio,
@@ -97,7 +97,7 @@ static int procesar_archivo_txt(void) {
 
     printf("\nDestinos almacenados correctamente:\n");
     for (int i = 0; i < destinos_leidos; i++) {
-        printf("%s %s %d\n",
+        printf("%s %s %.2f\n",
                destinos[i].nombre_destino,
                destinos[i].calle,
                destinos[i].posicion);
@@ -111,7 +111,7 @@ static int procesar_archivo_txt(void) {
     }
     for (int i = 0; i < calles_leidas; i++) {
         fprintf(salida_calles,
-                "%s %d %d %d %d %c\n",
+                "%s %.2f %.2f %.2f %.2f %c\n",
                 calles[i].nombre_calle,
                 calles[i].coordenada_x_inicio,
                 calles[i].coordenada_y_inicio,
@@ -129,7 +129,7 @@ static int procesar_archivo_txt(void) {
     }
     for (int i = 0; i < destinos_leidos; i++) {
         fprintf(salida_destinos,
-                "%s %s %d\n",
+                "%s %s %.2f\n",
                 destinos[i].nombre_destino,
                 destinos[i].calle,
                 destinos[i].posicion);

@@ -5,17 +5,17 @@
 
 typedef struct {
     char nombre_calle[100];
-    int coordenada_x_inicio;
-    int coordenada_y_inicio;
-    int coordenada_x_final;
-    int coordenada_y_final;
+    double coordenada_x_inicio;
+    double coordenada_y_inicio;
+    double coordenada_x_final;
+    double coordenada_y_final;
     char eje_calle;
 } Calle;
 
 typedef struct {
     char nombre_destino[100];
     char calle[100];
-    int posicion;
+    double posicion;
 } Destino;
 
 int obtener_Calles(FILE *archivo, Calle calles[], int *cantidad_calles) {
@@ -40,18 +40,29 @@ int obtener_Calles(FILE *archivo, Calle calles[], int *cantidad_calles) {
             return 0;
         }
 
-        if (sscanf(
-                linea_del_archivo,
-                "%99s %d %d %d %d %c",
-                calles[calles_leidas].nombre_calle,
-                &calles[calles_leidas].coordenada_x_inicio,
-                &calles[calles_leidas].coordenada_y_inicio,
-                &calles[calles_leidas].coordenada_x_final,
-                &calles[calles_leidas].coordenada_y_final,
-                &calles[calles_leidas].eje_calle
-            ) != 6) {
-            printf("Formato invalido en calle %d. Debe ser: Nombre_Calle Coordenada_X_Inicio_Calle Coordenada_Y_Inicio_Calle Coordenada_X_Final_Calle Coordenada_Y_Final_Calle Eje_Calle\n", calles_leidas + 1);
-            return 0;
+        {
+            double x_inicio;
+            double y_inicio;
+            double x_final;
+            double y_final;
+            if (sscanf(
+                    linea_del_archivo,
+                    "%99s %lf %lf %lf %lf %c",
+                    calles[calles_leidas].nombre_calle,
+                    &x_inicio,
+                    &y_inicio,
+                    &x_final,
+                    &y_final,
+                    &calles[calles_leidas].eje_calle
+                ) != 6) {
+                printf("Formato invalido en calle %d. Debe ser: Nombre_Calle Coordenada_X_Inicio_Calle Coordenada_Y_Inicio_Calle Coordenada_X_Final_Calle Coordenada_Y_Final_Calle Eje_Calle\n", calles_leidas + 1);
+                return 0;
+            }
+
+            calles[calles_leidas].coordenada_x_inicio = x_inicio;
+            calles[calles_leidas].coordenada_y_inicio = y_inicio;
+            calles[calles_leidas].coordenada_x_final = x_final;
+            calles[calles_leidas].coordenada_y_final = y_final;
         }
 
         calles[calles_leidas].eje_calle = (char)toupper((unsigned char)calles[calles_leidas].eje_calle);
@@ -77,9 +88,9 @@ int obtener_Destinos(FILE *archivo, Destino destinos[], int *cantidad_destinos) 
 
     {
         char nombre_tmp[100];
-        int xi, yi, xf, yf;
+        double xi, yi, xf, yf;
         char eje_tmp;
-        if (sscanf(linea_del_archivo, "%99s %d %d %d %d %c", nombre_tmp, &xi, &yi, &xf, &yf, &eje_tmp) == 6) {
+        if (sscanf(linea_del_archivo, "%99s %lf %lf %lf %lf %c", nombre_tmp, &xi, &yi, &xf, &yf, &eje_tmp) == 6) {
             printf("Hay mas calles de las que deberian.\n");
             return 0;
         }
@@ -108,9 +119,13 @@ int obtener_Destinos(FILE *archivo, Destino destinos[], int *cantidad_destinos) 
             return 0;
         }
 
-        if (sscanf(linea_del_archivo, "%99s %99s %d", destinos[destinos_leidos].nombre_destino, destinos[destinos_leidos].calle, &destinos[destinos_leidos].posicion) != 3) {
-            printf("Formato invalido en destino %d. Debe ser: nombre_destino calle posicion\n", destinos_leidos + 1);
-            return 0;
+        {
+            double posicion_tmp;
+            if (sscanf(linea_del_archivo, "%99s %99s %lf", destinos[destinos_leidos].nombre_destino, destinos[destinos_leidos].calle, &posicion_tmp) != 3) {
+                printf("Formato invalido en destino %d. Debe ser: nombre_destino calle posicion\n", destinos_leidos + 1);
+                return 0;
+            }
+            destinos[destinos_leidos].posicion = posicion_tmp;
         }
     }
 

@@ -2,41 +2,47 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 typedef struct {
 	char nombre_calle[100];
-	int coordenada_x_inicio;
-	int coordenada_y_inicio;
-	int coordenada_x_final;
-	int coordenada_y_final;
+	double coordenada_x_inicio;
+	double coordenada_y_inicio;
+	double coordenada_x_final;
+	double coordenada_y_final;
 	char eje_calle;
 } Calle;
 
 typedef struct {
 	char nombre_destino[100];
 	char calle[100];
-	int posicion;
+	double posicion;
 } Destino;
 
 typedef struct {
-	int x;
-	int y;
+	double x;
+	double y;
 	int valido;
 	int en_rango;
 } Coordenada;
 
-static int minimo(int a, int b) {
+static double minimo(double a, double b) {
 	if (a < b) {
 		return a;
 	}
 	return b;
 }
 
-static int maximo(int a, int b) {
+static double maximo(double a, double b) {
 	if (a > b) {
 		return a;
 	}
 	return b;
+}
+
+static int casi_igual(double a, double b) {
+	const double eps = 1e-9;
+	return fabs(a - b) < eps;
 }
 
 
@@ -52,11 +58,10 @@ static int buscar_indice_calle(const Calle calles[], int cantidad_calles, const 
 //Esta funcion recibe la calle con sus puntos iniciales y finales. El posicion es el destino en esa calle.
 //IMPORTANTE: Como se obtiene un eje de calle, para las horizontales y verticales, se hace el mismo procedimiento.
 //Tuve que implementar interpolación lineal pq si no las diagonales las tomaba como vertical u horizontal solamente modificando el valor puesto en la entrada.
-static Coordenada convertir_posicion_a_coordenada(Calle calle, int posicion) {
+static Coordenada convertir_posicion_a_coordenada(Calle calle, double posicion) {
 
 	Coordenada resultado;
-	long long numerador;
-	long long denominador;
+	double t;
 	resultado.x = 0;
 	resultado.y = 0;
 	resultado.valido = 0;
@@ -65,38 +70,38 @@ static Coordenada convertir_posicion_a_coordenada(Calle calle, int posicion) {
     //Caso horizontal
 	if (calle.eje_calle == 'X') {
 
-		if (calle.coordenada_x_inicio == calle.coordenada_x_final) {
+		if (casi_igual(calle.coordenada_x_inicio, calle.coordenada_x_final)) {
 			return resultado;
 		}
 		resultado.x = posicion;
-		numerador = (long long)(posicion - calle.coordenada_x_inicio) *
-			(long long)(calle.coordenada_y_final - calle.coordenada_y_inicio);
-		denominador = (long long)(calle.coordenada_x_final - calle.coordenada_x_inicio);
-		resultado.y = calle.coordenada_y_inicio + (int)(numerador / denominador);
+		t = (posicion - calle.coordenada_x_inicio) /
+			(calle.coordenada_x_final - calle.coordenada_x_inicio);
+		resultado.y = calle.coordenada_y_inicio +
+			t * (calle.coordenada_y_final - calle.coordenada_y_inicio);
 
 		//Verificación de que la posición dada esté dentro del rango de la calle. Se compara con los extremos de X.
-		resultado.en_rango = (posicion >= minimo(calle.coordenada_x_inicio, calle.coordenada_x_final) &&
-							  posicion <= maximo(calle.coordenada_x_inicio, calle.coordenada_x_final));
+		resultado.en_rango = (posicion + 1e-9 >= minimo(calle.coordenada_x_inicio, calle.coordenada_x_final) &&
+							  posicion - 1e-9 <= maximo(calle.coordenada_x_inicio, calle.coordenada_x_final));
 		resultado.valido = 1;
 		return resultado;
 	}
 
 	//Caso vertical
 	if (calle.eje_calle == 'Y') {
-		if (calle.coordenada_y_inicio == calle.coordenada_y_final) {
+		if (casi_igual(calle.coordenada_y_inicio, calle.coordenada_y_final)) {
 			return resultado;
 		}
 		resultado.y = posicion;
 
         //interpolacion lineal
-		numerador = (long long)(posicion - calle.coordenada_y_inicio) *
-			(long long)(calle.coordenada_x_final - calle.coordenada_x_inicio);
-		denominador = (long long)(calle.coordenada_y_final - calle.coordenada_y_inicio);
-		resultado.x = calle.coordenada_x_inicio + (int)(numerador / denominador);
+		t = (posicion - calle.coordenada_y_inicio) /
+			(calle.coordenada_y_final - calle.coordenada_y_inicio);
+		resultado.x = calle.coordenada_x_inicio +
+			t * (calle.coordenada_x_final - calle.coordenada_x_inicio);
 
 		/* Validacion equivalente al caso anterior, pero en Y. */
-		resultado.en_rango = (posicion >= minimo(calle.coordenada_y_inicio, calle.coordenada_y_final) &&
-							  posicion <= maximo(calle.coordenada_y_inicio, calle.coordenada_y_final));
+		resultado.en_rango = (posicion + 1e-9 >= minimo(calle.coordenada_y_inicio, calle.coordenada_y_final) &&
+							  posicion - 1e-9 <= maximo(calle.coordenada_y_inicio, calle.coordenada_y_final));
 		resultado.valido = 1;
 		return resultado;
 	}
@@ -116,7 +121,7 @@ static int leer_calles(const char *archivo, Calle calles[], int *cantidad_calles
 
 	while (fgets(linea, sizeof(linea), entrada) != NULL && contador < 50) {
 		if (sscanf(linea,
-				   "%99s %d %d %d %d %c",
+				   "%99s %lf %lf %lf %lf %c",
 				   calles[contador].nombre_calle,
 				   &calles[contador].coordenada_x_inicio,
 				   &calles[contador].coordenada_y_inicio,
@@ -148,7 +153,7 @@ static int leer_destinos(const char *archivo, Destino destinos[], int *cantidad_
 	}
 
 	while (fgets(linea, sizeof(linea), entrada) != NULL && contador < 200) {
-		if (sscanf(linea, "%99s %99s %d", destinos[contador].nombre_destino, destinos[contador].calle, &destinos[contador].posicion) != 3) {
+		if (sscanf(linea, "%99s %99s %lf", destinos[contador].nombre_destino, destinos[contador].calle, &destinos[contador].posicion) != 3) {
 			printf("Formato invalido en destino %d.\n", contador + 1);
 			fclose(entrada);
 			return 0;
@@ -204,13 +209,13 @@ int ejecutar_mapa(void) {
 		}
 
 		if (!coordenada.en_rango) {
-			printf("%s: coordenada (%d, %d) fuera del rango de la calle %s\n",
+			printf("%s: coordenada (%.2f, %.2f) fuera del rango de la calle %s\n",
 				   destinos[i].nombre_destino,
 				   coordenada.x,
 				   coordenada.y,
 				   destinos[i].calle);
 			fprintf(salida,
-					"%s: coordenada (%d, %d) fuera del rango de la calle %s\n",
+					"%s: coordenada (%.2f, %.2f) fuera del rango de la calle %s\n",
 					destinos[i].nombre_destino,
 					coordenada.x,
 					coordenada.y,
@@ -218,8 +223,8 @@ int ejecutar_mapa(void) {
 			continue;
 		}
 
-		printf("%s: coordenada (%d, %d)\n", destinos[i].nombre_destino, coordenada.x, coordenada.y);
-		fprintf(salida, "%s %d %d\n", destinos[i].nombre_destino, coordenada.x, coordenada.y);
+		printf("%s: coordenada (%.2f, %.2f)\n", destinos[i].nombre_destino, coordenada.x, coordenada.y);
+		fprintf(salida, "%s %.2f %.2f\n", destinos[i].nombre_destino, coordenada.x, coordenada.y);
 	}
 
 	fclose(salida);

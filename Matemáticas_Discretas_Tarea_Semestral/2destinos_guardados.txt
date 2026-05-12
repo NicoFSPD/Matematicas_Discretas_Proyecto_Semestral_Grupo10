@@ -1,0 +1,5 @@
+Rio Horizontal4 25.00
+Iglesia Diagonal 300.00
+Plaza Vertical3 0.00
+Museo Horizontal2 300.00
+Parque Vertical4 430.00
