@@ -89,3 +89,4 @@ El programa considera:
 - Verificación de intersecciones.
 - Construcción automática del grafo.
 - Generación de rutas entre destinos turísticos.
+- IMPORTANTE: Si ejecuta correctamente, los 8 archivos se van a ejecutar, en el caso de que no ocurra, pueden quedar los archivos sueltos, no afectan el rendimiento del programa, pues se reescriben en cada iteración correcta. Ellos están netamente para visualizar el proceso lógico y entender nuestro pensamiento.
